@@ -8,4 +8,6 @@ This program finds common free time slots for a group of people based on their b
 
 # How to Run
 1. Install Python (version 3.6 or later).
-2. Run the code and the output will appear in Output.txt
+2. Open 333_P1 Folder and make sure Input.txt and Output.txt are in same folder as project1_starter.py
+3. Run the project1_starter.py file and the results will appear in Output.txt
+(Follow the Input.txt json format if you want to test your specific test cases or else program will break)
