@@ -60,6 +60,8 @@ def find_free(busy_times, working_hours, min_time):
         free_times.append((current, end))
     
     return free_times
+
+#look for avaiabile free times between the two schedules
 def find_common_free_times(person1_free_times, person2_free_times, duration_of_meeting):
     common_free_times = []
     i = 0
@@ -80,74 +82,42 @@ def find_common_free_times(person1_free_times, person2_free_times, duration_of_m
 
     return common_free_times
 
+# func to handle multiple inputs from the file to find the common free times
+def handle_common_times(p1_busy, p1_work, p2_busy, p2_work, dur):
+    p1_schedule = schedule_to_minutes(p1_busy)
+    p1_start, p1_end = time_to_minutes(p1_work[0]), time_to_minutes(p1_work[1])
+    p1_hours = (p1_start, p1_end)
+
+    p2_schedule = schedule_to_minutes(p2_busy)
+    p2_start, p2_end = time_to_minutes(p2_work[0]), time_to_minutes(p2_work[1])
+    p2_hours = (p2_start, p2_end)
+
+    meeting_time = dur
+
+    p1_free, p2_free = find_free(p1_schedule, p1_hours, meeting_time), find_free(p2_schedule, p2_hours, meeting_time)
+    common_free =  find_common_free_times(p1_free, p2_free, meeting_time)
+
+    return format_time(common_free)
+
 def main():
     results = []
 
-    # test out the functions
-    
-    busy_times = [["09:00", "10:00"], ["12:00", "13:00"]]
-    working_hours = ["09:00", "17:00"]
-    min_time = 60
+    with open("Input.txt", "r") as file:
+        for line in file:
+            schedule_data = json.loads(line.strip())
+            meeting_slots = handle_common_times(
+                schedule_data["person1_Schedule"],
+                schedule_data["person1_DailyAct"],
+                schedule_data["person2_Schedule"],
+                schedule_data["person2_DailyAct"],
+                schedule_data["duration_of_meeting"]
+            )
+            results.append(meeting_slots)
 
-    working_hours_min = (time_to_minutes(working_hours[0]), time_to_minutes(working_hours[1]))
-    busy_times_min = schedule_to_minutes(busy_times)
-    free_times = find_free(busy_times_min, working_hours_min, min_time)
-    formatted_free_times = format_time(free_times)
 
-
-    # Read input.txt file and store the data
-    with open("Input.txt", "r") as f:
-        for line in f:
-            data = json.loads(line.strip())
-            results.append(data)
-    for data in results:
-        person1_schedule = data.get("person1_Schedule", [])
-        person1_daily_activity = data.get("person1_DailyAct", [])
-        person2_schedule = data.get("person2_Schedule", [])
-        person2_daily_activity = data.get("person2_DailyAct", [])
-        duration_of_meeting = data.get("duration_of_meeting", 30)
-         # Convert daily activity time to minutes
-        person1_daily_activity_min = [time_to_minutes(time) for time in person1_daily_activity]
-        person2_daily_activity_min = [time_to_minutes(time) for time in person2_daily_activity]
-
-        # Find free time for both individuals
-        person1_working_hours_min = (person1_daily_activity_min[0], person1_daily_activity_min[1])
-        person2_working_hours_min = (person2_daily_activity_min[0], person2_daily_activity_min[1])
-
-        person1_busy_times_min = schedule_to_minutes(person1_schedule)
-        person2_busy_times_min = schedule_to_minutes(person2_schedule)
-
-        person1_free_times = find_free(person1_busy_times_min, person1_working_hours_min, duration_of_meeting)
-        person2_free_times = find_free(person2_busy_times_min, person2_working_hours_min, duration_of_meeting)
-
-        # Find common free times
-        common_free_times = find_common_free_times(person1_free_times, person2_free_times, duration_of_meeting)
-
-        # Convert free times back to text format
-        formatted_person1_free_times = format_time(person1_free_times)
-        formatted_person2_free_times = format_time(person2_free_times)
-        formatted_common_free_times = format_time(common_free_times)
-
-    # Output results into output.txt file in a neat format
-    with open("Output.txt", "w") as f:
-        
-         f.write("schedule1 " + str(person1_schedule) + "\n")
-         f.write("daily1 " + str(person1_daily_activity) + "\n")
-         f.write("schedule2 " + str(person2_schedule) + "\n")
-         f.write("daily2 " + str(person2_daily_activity) + "\n")
-        
-         f.write("Person 1 Free Times:\n")
-         for start, end in formatted_person1_free_times:
-             f.write(f"From {start} to {end}\n")
-        
-         f.write("Person 2 Free Times:\n")
-         for start, end in formatted_person2_free_times:
-             f.write(f"From {start} to {end}\n")
-
-         f.write("Common Free Times:\n")
-         for start, end in formatted_common_free_times:
-             f.write(f"From {start} to {end}\n")
-   
+    with open("Output.txt", "w") as file:
+        for result in results:
+            file.write(json.dumps(result) + "\n")
         
 
 if __name__ == "__main__":
