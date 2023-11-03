@@ -8,3 +8,4 @@ This program finds common free time slots for a group of people based on their b
 
 # How to Run
 1. Install Python (version 3.6 or later).
+2. Run the code and the output will appear in Output.txt
